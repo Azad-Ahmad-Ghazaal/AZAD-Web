@@ -1,10 +1,10 @@
 # AZAD Web
 
-Public web frontend for **AZAD**, connected to the private `AZAD-AI` backend.
+Public web frontend for **AZAD**, connected to the `AZAD-AI` backend.
 
 ## Architecture
 
-`AZAD-Web` is the static GitHub Pages frontend. The intelligence, memory, agents, bots, voice and API remain in the private `AZAD-AI` repository.
+`AZAD-Web` is the public frontend. The intelligence, memory, agents, bots, voice and API remain in `AZAD-AI`.
 
 - Frontend: `ghazaalbaloch1-cloud/AZAD-Web`
 - Backend: `ghazaalbaloch1-cloud/AZAD-AI`
@@ -16,10 +16,8 @@ Public web frontend for **AZAD**, connected to the private `AZAD-AI` backend.
 
 ## Deployment
 
-Publish the `main` branch with GitHub Pages. The frontend asks for the backend URL and access token in the browser, so secrets are not committed to this public repository.
+Deploy this repository with Vercel (or another static host). The frontend no longer asks users for an access token and does not store authentication credentials in browser storage.
 
-The backend should run with `AZAD_ENV=production` and a strong `AZAD_MOBILE_TOKEN`. For the GitHub Pages frontend, allow the origin `https://ghazaalbaloch1-cloud.github.io` through `AZAD_ALLOWED_ORIGINS` (the AZAD backend now includes this origin by default).
+Set the production backend URL in `index.html` via the `AZAD_BACKEND_URL` constant when the backend endpoint changes. Do not commit API keys, access tokens, model credentials, private URLs, or user data.
 
-## Important
-
-Do not commit API keys, access tokens, model credentials, private URLs, or user data to this repository.
+The backend must be configured separately. Public deployment should retain server-side rate limiting and authorization controls even though the frontend has no token UI.
