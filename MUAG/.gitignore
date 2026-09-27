@@ -1,0 +1,7 @@
+build/
+out/
+*.iso
+*.img
+*.img.xz
+*.qcow2
+*.log
