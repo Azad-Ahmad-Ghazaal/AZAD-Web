@@ -1,25 +1,31 @@
-# MUAG Shell Prototype
+# MUAG Shell
 
-This directory defines the first desktop-shell contract.
+The shell prototype is the user-facing desktop layer for MUAG Project.
 
-## Required shell surfaces
+## Current prototype
 
-1. Bottom taskbar with centered launcher
-2. Start menu with search
-3. Pinned applications
-4. Recent files/applications
-5. Quick settings
-6. Notifications
-7. Clock/calendar
-8. Battery/network/audio indicators
-9. Touch-friendly context menus
-10. Virtual desktop hooks
+- Windows-11-inspired centered taskbar
+- Start menu
+- App search
+- Pinned applications
+- Recommended items
+- Clock/status area
+- Touch-friendly controls
+- Responsive layout
 
-## Input contract
+## Runtime
 
-- Pointer/touch primary activation: left click / tap
-- Context activation: right click / long press
-- Scroll: wheel / touch scroll
-- Future gesture hooks: swipe and pinch
+- `index.html` contains the UI.
+- `muag-shell.py` launches the UI in the first available Chromium/Chrome/Firefox runtime.
+- The launcher is replaceable; hardware services must remain independent from the UI.
+
+## Integration roadmap
+
+1. Package the shell into the Buildroot root filesystem.
+2. Add a Chromium-based runtime.
+3. Connect Files, Settings, Terminal and Hardware Check to real MUAG services.
+4. Add touchscreen gesture handling.
+5. Add Wi-Fi, Bluetooth, battery, audio and notification status providers.
+6. Replace the prototype launcher with a lighter native shell if image/RAM targets require it.
 
 The shell must not own hardware drivers. Hardware state comes from Linux services and system interfaces, ALSA, BlueZ and networking interfaces.
