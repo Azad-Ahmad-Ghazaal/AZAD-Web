@@ -1,3 +1,14 @@
 #!/bin/sh
-xsetroot -solid "#202124" 2>/dev/null || true
+# MUAG graphical session entry point.
+# Prefer the graphical shell when a browser runtime is installed;
+# otherwise keep the lightweight Openbox fallback available.
+
+xsetroot -solid "#101318" 2>/dev/null || true
+
+if command -v muag-shell >/dev/null 2>&1; then
+    muag-shell &
+else
+    xterm &
+fi
+
 exec openbox-session
