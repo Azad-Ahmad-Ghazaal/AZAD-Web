@@ -1,0 +1,37 @@
+{
+  "name": "MUAG Control Bridge",
+  "version": "1.0",
+  "project": "MUAG Project",
+  "repository": "Azad-Ahmad-Ghazaal/AZAD-Web",
+  "development_branch": "feat/muag-os-v0.1",
+  "stable_branch": "main",
+  "architecture": {
+    "development_control": "github_connector",
+    "runtime_control": "local_unix_socket",
+    "assistant": "AZAD",
+    "os": "MUAG"
+  },
+  "allowed_development_operations": [
+    "read_repository",
+    "write_development_branch",
+    "inspect_ci",
+    "inspect_ci_logs",
+    "prepare_build_fixes"
+  ],
+  "forbidden_development_data": [
+    "api_keys",
+    "passwords",
+    "cookies",
+    "session_tokens",
+    "machine_identifiers",
+    "automatic_location_data",
+    "unrelated_personal_data",
+    "hidden_telemetry"
+  ],
+  "runtime_boundary": {
+    "socket": "/run/muag/azad.sock",
+    "network_listener": false,
+    "allowlist_required": true,
+    "destructive_actions_require_confirmation": true
+  }
+}
