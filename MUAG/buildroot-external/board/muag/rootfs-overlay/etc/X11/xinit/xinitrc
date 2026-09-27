@@ -1,0 +1,3 @@
+#!/bin/sh
+xsetroot -solid "#202124" 2>/dev/null || true
+exec openbox-session
