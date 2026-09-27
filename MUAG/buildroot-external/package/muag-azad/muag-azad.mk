@@ -9,6 +9,7 @@ define MUAG_AZAD_INSTALL_TARGET_CMDS
 	$(INSTALL) -D -m 0755 $(@D)/muag_action_bridge.py $(TARGET_DIR)/usr/bin/muag-action
 	$(INSTALL) -D -m 0755 $(@D)/muag_actiond.py $(TARGET_DIR)/usr/bin/muag-actiond
 	$(INSTALL) -D -m 0755 $(@D)/training/trace.py $(TARGET_DIR)/usr/bin/muag-azad-trace
+	$(INSTALL) -D -m 0755 $(@D)/voice/muag_voice.py $(TARGET_DIR)/usr/bin/muag-voice
 endef
 
 $(eval $(generic-package))
