@@ -7,6 +7,7 @@ define MUAG_AZAD_INSTALL_TARGET_CMDS
 	$(INSTALL) -d $(TARGET_DIR)/usr/share/muag/azad
 	cp -a $(@D)/. $(TARGET_DIR)/usr/share/muag/azad/
 	$(INSTALL) -D -m 0755 $(@D)/muag_action_bridge.py $(TARGET_DIR)/usr/bin/muag-action
+	$(INSTALL) -D -m 0755 $(@D)/muag_actiond.py $(TARGET_DIR)/usr/bin/muag-actiond
 	$(INSTALL) -D -m 0755 $(@D)/training/trace.py $(TARGET_DIR)/usr/bin/muag-azad-trace
 endef
 

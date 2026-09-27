@@ -1,9 +1,9 @@
 #!/bin/sh
 xsetroot -solid "#101318" 2>/dev/null || true
 
-# Start AZAD action service in the background; it only exposes an allowlist.
-if command -v muag-action >/dev/null 2>&1; then
-    ( while true; do nc -l -p 8765 -e /usr/bin/muag-action 2>/dev/null || sleep 1; done ) &
+# AZAD -> MUAG control uses a local Unix socket only; no network listener.
+if command -v muag-actiond >/dev/null 2>&1; then
+    muag-actiond >/var/log/muag-actiond.log 2>&1 &
 fi
 
 if command -v muag-shell >/dev/null 2>&1; then
