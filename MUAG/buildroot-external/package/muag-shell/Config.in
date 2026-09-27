@@ -1,0 +1,5 @@
+config BR2_PACKAGE_MUAG_SHELL
+	bool "MUAG graphical shell"
+	depends on BR2_PACKAGE_PYTHON3
+	help
+	  Install the MUAG graphical shell prototype.
