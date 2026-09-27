@@ -1,11 +1,7 @@
 #!/bin/sh
 xsetroot -solid "#101318" 2>/dev/null || true
 
-# AZAD -> MUAG control uses a local Unix socket only; no network listener.
-if command -v muag-actiond >/dev/null 2>&1; then
-    muag-actiond >/var/log/muag-actiond.log 2>&1 &
-fi
-
+# AZAD -> MUAG control is provided by the boot-time local Unix socket service.
 if command -v muag-shell >/dev/null 2>&1; then
     muag-shell &
 else
