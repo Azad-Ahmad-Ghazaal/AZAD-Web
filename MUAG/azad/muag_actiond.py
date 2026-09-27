@@ -5,13 +5,14 @@ from __future__ import annotations
 
 import json
 import os
-import socket
 import signal
+import socket
 
 from muag_action_bridge import handle
 
 SOCKET_PATH = "/run/muag/azad.sock"
 BUFFER = 1024 * 1024
+
 
 def main() -> None:
     os.makedirs(os.path.dirname(SOCKET_PATH), exist_ok=True)
@@ -26,28 +27,36 @@ def main() -> None:
     server.listen(8)
 
     def stop(_sig, _frame):
+        server.close()
         try:
-            server.close()
-        finally:
-            try:
-                os.unlink(SOCKET_PATH)
-            except FileNotFoundError:
-                pass
+            os.unlink(SOCKET_PATH)
+        except FileNotFoundError:
+            pass
         raise SystemExit(0)
 
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
 
-    while True:
-        conn, _ = server.accept()
-        with conn:
-            try:
-                raw = conn.recv(BUFFER)
-                request = json.loads(raw.decode("utf-8"))
-                response = handle(request)
-            except Exception as exc:
-                response = {"ok": False, "error": f"invalid request: {exc}"}
-            conn.sendall((json.dumps(response, ensure_ascii=False) + "\n").encode("utf-8"))
+    try:
+        while True:
+            conn, _ = server.accept()
+            with conn:
+                try:
+                    raw = conn.recv(BUFFER)
+                    request = json.loads(raw.decode("utf-8"))
+                    if not isinstance(request, dict):
+                        raise ValueError("request must be a JSON object")
+                    response = handle(request)
+                except Exception as exc:
+                    response = {"ok": False, "error": f"invalid request: {exc}"}
+                conn.sendall((json.dumps(response, ensure_ascii=False) + "\n").encode("utf-8"))
+    finally:
+        server.close()
+        try:
+            os.unlink(SOCKET_PATH)
+        except FileNotFoundError:
+            pass
+
 
 if __name__ == "__main__":
     main()
