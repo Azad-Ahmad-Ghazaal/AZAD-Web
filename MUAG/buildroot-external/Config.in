@@ -1,0 +1,7 @@
+menu "MUAG Project"
+
+config BR2_PACKAGE_MUAG_BASE
+	bool "MUAG base system"
+	default y
+
+endmenu
