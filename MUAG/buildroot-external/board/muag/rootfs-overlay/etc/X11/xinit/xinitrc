@@ -1,9 +1,10 @@
 #!/bin/sh
-# MUAG graphical session entry point.
-# Prefer the graphical shell when a browser runtime is installed;
-# otherwise keep the lightweight Openbox fallback available.
-
 xsetroot -solid "#101318" 2>/dev/null || true
+
+# Start AZAD action service in the background; it only exposes an allowlist.
+if command -v muag-action >/dev/null 2>&1; then
+    ( while true; do nc -l -p 8765 -e /usr/bin/muag-action 2>/dev/null || sleep 1; done ) &
+fi
 
 if command -v muag-shell >/dev/null 2>&1; then
     muag-shell &
