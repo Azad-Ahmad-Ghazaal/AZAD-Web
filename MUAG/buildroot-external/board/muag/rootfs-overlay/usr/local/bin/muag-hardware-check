@@ -1,0 +1,11 @@
+#!/bin/sh
+printf '%s\n' '=== MUAG hardware check ==='
+printf 'Architecture: '; uname -m
+printf 'Kernel: '; uname -r
+printf 'RAM: '; awk '/MemTotal/ {printf "%.0f MB\n",$2/1024}' /proc/meminfo
+printf '%s\n' 'Input devices:'
+cat /proc/bus/input/devices 2>/dev/null | grep -E 'Name=|Handlers=' || true
+printf '%s\n' 'Network:'
+ip -brief link 2>/dev/null || true
+printf '%s\n' 'USB:'
+lsusb 2>/dev/null || true
