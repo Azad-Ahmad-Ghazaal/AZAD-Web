@@ -1,0 +1,5 @@
+config BR2_PACKAGE_MUAG_AZAD
+    bool "MUAG AZAD runtime"
+    depends on BR2_PACKAGE_PYTHON3
+    help
+      Bundles the AZAD assistant runtime and MUAG action bridge.
