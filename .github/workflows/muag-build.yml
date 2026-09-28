@@ -39,7 +39,9 @@ jobs:
 
       - name: Build MUAG
         run: |
-          chmod 755 "$GITHUB_WORKSPACE/MUAG/buildroot-external/board/muag/post-build.sh"
+          sudo chmod 755 "$GITHUB_WORKSPACE/MUAG/buildroot-external/board/muag/post-build.sh"
+          sudo chmod +x "$GITHUB_WORKSPACE/MUAG/buildroot-external/board/muag/post-build.sh"
+          stat -c '%A %a %n' "$GITHUB_WORKSPACE/MUAG/buildroot-external/board/muag/post-build.sh"
           test -x "$GITHUB_WORKSPACE/MUAG/buildroot-external/board/muag/post-build.sh"
           make -C /tmp/buildroot-2025.02.18 \
             BR2_EXTERNAL="$GITHUB_WORKSPACE/MUAG/buildroot-external" \
