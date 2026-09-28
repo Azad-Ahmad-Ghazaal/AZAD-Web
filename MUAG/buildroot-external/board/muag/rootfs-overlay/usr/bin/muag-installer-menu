@@ -51,13 +51,19 @@ install_to_disk() {
   fi
 
   printf '\nWriting MUAG to /dev/sda...\n' > "$TTY"
+  printf 'Copying installation image; please wait.\n' > "$TTY"
   sync
-  dd if="$SOURCE" of="$DISK" bs=4M conv=fsync status=progress > "$TTY" 2>&1 || {
-    printf '\nInstallation failed.\n' > "$TTY"
-    sleep 4
+
+  # BusyBox dd does not reliably provide GNU coreutils' status=progress.
+  # Use the portable BusyBox form and expose the real dd error if it fails.
+  if dd if="$SOURCE" of="$DISK" bs=4M > "$TTY" 2>&1; then
+    sync
+  else
+    printf '\nINSTALL FAILED: unable to write MUAG image to /dev/sda.\n' > "$TTY"
+    printf 'The dd error above is the actual failure reason.\n' > "$TTY"
+    sleep 8
     return 0
-  }
-  sync
+  fi
 
   printf '\nMUAG installation image written successfully.\n' > "$TTY"
   printf 'Power off the VM, remove the ISO, then boot from the disk.\n' > "$TTY"
