@@ -18,20 +18,30 @@ jobs:
       - name: Install host dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y             bc bison build-essential cpio file flex gawk git             libncurses-dev rsync unzip wget python3
+          sudo apt-get install -y \
+            bc bison build-essential cpio file flex gawk git \
+            libelf-dev libncurses-dev rsync unzip wget python3
 
       - name: Download Buildroot LTS
         run: |
-          curl -L --fail             https://buildroot.org/downloads/buildroot-2025.02.18.tar.xz             -o /tmp/buildroot.tar.xz
+          curl -L --fail \
+            https://buildroot.org/downloads/buildroot-2025.02.18.tar.xz \
+            -o /tmp/buildroot.tar.xz
           tar -xf /tmp/buildroot.tar.xz -C /tmp
 
       - name: Configure MUAG
         run: |
-          make -C /tmp/buildroot-2025.02.18             BR2_EXTERNAL="$GITHUB_WORKSPACE/MUAG/buildroot-external"             O="$GITHUB_WORKSPACE/MUAG/output"             muag_x86_64_defconfig
+          make -C /tmp/buildroot-2025.02.18 \
+            BR2_EXTERNAL="$GITHUB_WORKSPACE/MUAG/buildroot-external" \
+            O="$GITHUB_WORKSPACE/MUAG/output" \
+            muag_x86_64_defconfig
 
       - name: Build MUAG
         run: |
-          make -C /tmp/buildroot-2025.02.18             BR2_EXTERNAL="$GITHUB_WORKSPACE/MUAG/buildroot-external"             O="$GITHUB_WORKSPACE/MUAG/output"             -j"$(nproc)"
+          make -C /tmp/buildroot-2025.02.18 \
+            BR2_EXTERNAL="$GITHUB_WORKSPACE/MUAG/buildroot-external" \
+            O="$GITHUB_WORKSPACE/MUAG/output" \
+            -j"$(nproc)"
 
       - name: Verify image size and boot artifact
         run: |
