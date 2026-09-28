@@ -5,3 +5,4 @@ source "$BR2_EXTERNAL_MUAG_PATH/package/muag-shell/Config.in"
 endmenu
 
 source "$(BR2_EXTERNAL_MUAG_PATH)/package/muag-azad/Config.in"
+source "$(BR2_EXTERNAL_MUAG_PATH)/package/muag-whisper/Config.in"
