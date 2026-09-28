@@ -1,0 +1,85 @@
+#!/bin/sh
+set -eu
+
+TTY=/dev/tty1
+[ -c "$TTY" ] || TTY=/dev/console
+
+clear_screen() {
+  printf '\033c' > "$TTY"
+}
+
+live_shell() {
+  printf '\nStarting MUAG live shell...\n' > "$TTY"
+  exit 0
+}
+
+install_to_disk() {
+  DISK=/dev/sda
+  SOURCE=/dev/sr0
+
+  clear_screen
+  printf '%s\n' \
+    '==================================================' \
+    '              MUAG Project Installer             ' \
+    '==================================================' \
+    '' \
+    'This will write the MUAG hybrid ISO directly to:' \
+    '  /dev/sda' \
+    '' \
+    'ALL DATA ON /dev/sda WILL BE ERASED.' \
+    '' \
+    'Type YES to continue: ' > "$TTY"
+
+  read ANSWER < "$TTY" || ANSWER=""
+  [ "$ANSWER" = "YES" ] || {
+    printf '\nInstallation cancelled.\n' > "$TTY"
+    sleep 2
+    return 0
+  }
+
+  if [ ! -b "$SOURCE" ]; then
+    printf '\nERROR: MUAG installation media (/dev/sr0) not found.\n' > "$TTY"
+    printf 'Attach the MUAG ISO as the VM optical drive and reboot.\n' > "$TTY"
+    sleep 4
+    return 0
+  fi
+
+  if [ ! -b "$DISK" ]; then
+    printf '\nERROR: target disk /dev/sda not found.\n' > "$TTY"
+    sleep 4
+    return 0
+  fi
+
+  printf '\nWriting MUAG to /dev/sda...\n' > "$TTY"
+  sync
+  dd if="$SOURCE" of="$DISK" bs=4M conv=fsync status=progress > "$TTY" 2>&1 || {
+    printf '\nInstallation failed.\n' > "$TTY"
+    sleep 4
+    return 0
+  }
+  sync
+
+  printf '\nMUAG installation image written successfully.\n' > "$TTY"
+  printf 'Power off the VM, remove the ISO, then boot from the disk.\n' > "$TTY"
+  printf '\nPress Enter to reboot...\n' > "$TTY"
+  read _ < "$TTY" || true
+  reboot -f
+}
+
+clear_screen
+printf '%s\n' \
+  '==================================================' \
+  '                 MUAG Project v0.1                ' \
+  '==================================================' \
+  '' \
+  '1) Start MUAG live shell' \
+  '2) Install MUAG to /dev/sda' \
+  '' \
+  'Select [1-2]: ' > "$TTY"
+
+read CHOICE < "$TTY" || CHOICE=1
+
+case "$CHOICE" in
+  2) install_to_disk ;;
+  *) live_shell ;;
+esac
