@@ -1,0 +1,71 @@
+name: MUAG OS Auto Build
+on:
+  push:
+    branches: [ "feat/muag-os-v0.1" ]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Repository scan
+        shell: bash
+        run: |
+          set -euxo pipefail
+          find . -maxdepth 4 -type f -not -path './.git/*' | sort | tee repo-scan.txt
+          echo '=== build candidates ===' | tee -a repo-scan.txt
+          find . -maxdepth 4 -type f \( -name 'Makefile' -o -name 'build.sh' -o -name '*.iso' -o -name 'Cargo.toml' \) -print | tee -a repo-scan.txt
+      - name: Install OS build/test tools
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc gnu-efi xorriso dosfstools qemu-system-x86 ovmf mtools
+      - name: Build MUAG UEFI ISO
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p build/efi/EFI/BOOT build/work
+          EFI_GNUEFI=/usr/lib/gnuefi
+          gcc -I/usr/include/efi -I/usr/include/efi/x86_64 -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone -maccumulate-outgoing-args -DEFI_FUNCTION_WRAPPER -c muag/boot/boot.c -o build/work/boot.o
+          ld -nostdlib -znocombreloc -T "$EFI_GNUEFI/elf_x86_64_efi.lds" -shared -Bsymbolic -L/usr/lib -L/usr/lib/x86_64-linux-gnu "$EFI_GNUEFI/crt0-efi-x86_64.o" build/work/boot.o -o build/work/boot.so -lefi -lgnuefi
+          objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela -j .reloc --target=efi-app-x86_64 build/work/boot.so build/efi/EFI/BOOT/BOOTX64.EFI
+          truncate -s 64M build/efi.img
+          mkfs.fat -F 32 build/efi.img
+          mmd -i build/efi.img ::/EFI
+          mmd -i build/efi.img ::/EFI/BOOT
+          mcopy -i build/efi.img build/efi/EFI/BOOT/BOOTX64.EFI ::/EFI/BOOT/BOOTX64.EFI
+          xorriso -as mkisofs -R -J -V MUAG -e efi.img -no-emul-boot -o build/muag-os.iso build/efi.img
+          test -s build/muag-os.iso
+          ls -lh build/muag-os.iso
+      - name: QEMU UEFI boot test
+        shell: bash
+        run: |
+          set -euxo pipefail
+          OVMF_CODE=$(find /usr/share/OVMF -type f \( -name 'OVMF_CODE.fd' -o -name 'OVMF_CODE_4M.fd' \) | head -n1)
+          test -n "$OVMF_CODE"
+          timeout 15s qemu-system-x86_64 -machine q35 -m 256M -bios "$OVMF_CODE" -cdrom build/muag-os.iso -nographic -serial stdio -monitor none > qemu-boot.log 2>&1 || RC=$?
+          RC=\${RC:-0}
+          cat qemu-boot.log
+          if [[ "$RC" -ne 0 && "$RC" -ne 124 ]]; then exit "$RC"; fi
+          xorriso -indev build/muag-os.iso -toc >/dev/null
+      - name: Build report
+        if: always()
+        shell: bash
+        run: |
+          echo "commit: $GITHUB_SHA" > muag-build-report.txt
+          ls -lh build/muag-os.iso >> muag-build-report.txt 2>&1 || true
+          cat qemu-boot.log >> muag-build-report.txt 2>&1 || true
+      - name: Upload final ISO and diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: muag-os-v0.1
+          path: |
+            build/muag-os.iso
+            repo-scan.txt
+            muag-build-report.txt
+            qemu-boot.log
+          if-no-files-found: error
