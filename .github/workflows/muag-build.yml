@@ -2,6 +2,8 @@ name: MUAG x86_64 Build
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [ "main" ]
   push:
     paths:
       - "MUAG/**"
@@ -19,7 +21,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            bc bison build-essential cpio elfutils file flex gawk git \
+            bc bison build-essential cpio elfutils file flex gawk git qemu-system-x86 ovmf xorriso \
             libelf-dev libdw-dev libncurses-dev zlib1g-dev \
             pahole pkg-config rsync unzip wget python3
 
@@ -56,6 +58,19 @@ jobs:
           MAX_BYTES=$((2*1024*1024*1024))
           test "$SIZE_BYTES" -le "$MAX_BYTES"
 
+      - name: Boot smoke test with QEMU
+        run: |
+          set -euxo pipefail
+          ISO="MUAG/output/images/rootfs.iso9660"
+          file "$ISO"
+          xorriso -indev "$ISO" -report_el_torito plain
+          OVMF_CODE=$(find /usr/share/OVMF -type f \( -name 'OVMF_CODE.fd' -o -name 'OVMF_CODE_4M.fd' \) | head -n1)
+          test -n "$OVMF_CODE"
+          timeout 20s qemu-system-x86_64 -machine q35 -m 512M -bios "$OVMF_CODE" -cdrom "$ISO" -display none -serial stdio -monitor none > MUAG/qemu-boot.log 2>&1 || RC=$?
+          RC=${RC:-0}
+          cat MUAG/qemu-boot.log
+          test "$RC" -eq 0 -o "$RC" -eq 124
+
       - name: Generate checksum
         run: |
           cd MUAG/output/images
@@ -68,3 +83,4 @@ jobs:
           path: |
             MUAG/output/images/rootfs.iso9660
             MUAG/output/images/rootfs.iso9660.sha256
+            MUAG/qemu-boot.log
