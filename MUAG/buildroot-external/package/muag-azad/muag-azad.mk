@@ -9,9 +9,11 @@ define MUAG_AZAD_INSTALL_TARGET_CMDS
 	cp -a $(@D)/. $(TARGET_DIR)/usr/share/muag/azad/
 	$(INSTALL) -D -m 0755 $(@D)/muag_action_bridge.py $(TARGET_DIR)/usr/bin/muag-action
 	$(INSTALL) -D -m 0755 $(@D)/muag_actiond.py $(TARGET_DIR)/usr/bin/muag-actiond
-	$(INSTALL) -D -m 0755 $(@D)/training/trace.py $(TARGET_DIR)/usr/bin/muag-azad-trace
+	$(INSTALL) -D -m 0755 $(@D)/runtime_client.py $(TARGET_DIR)/usr/bin/muag-azad-client
 	$(INSTALL) -D -m 0755 $(@D)/voice/muag_voice.py $(TARGET_DIR)/usr/bin/muag-voice
 	$(INSTALL) -D -m 0755 $(@D)/voice/continuous_voice.py $(TARGET_DIR)/usr/bin/muag-voice-loop
+	$(INSTALL) -D -m 0755 $(@D)/voice/voice_router.py $(TARGET_DIR)/usr/bin/muag-voice-router
+	$(INSTALL) -D -m 0755 $(@D)/training/trace.py $(TARGET_DIR)/usr/bin/muag-azad-trace
 endef
 
 $(eval $(generic-package))
