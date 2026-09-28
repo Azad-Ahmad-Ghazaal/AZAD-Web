@@ -12,3 +12,7 @@ if [ -d "$BR2_EXTERNAL_MUAG_PATH/../azad" ]; then
 fi
 chmod +x "$TARGET_DIR/usr/share/muag/azad/muag_action_bridge.py" 2>/dev/null || true
 chmod +x "$TARGET_DIR/usr/share/muag/azad/training/trace.py" 2>/dev/null || true
+
+# Make the boot-time MUAG installer menu executable in the final rootfs.
+chmod +x "$TARGET_DIR/etc/init.d/S99muag-installer" 2>/dev/null || true
+chmod +x "$TARGET_DIR/usr/bin/muag-installer-menu" 2>/dev/null || true
