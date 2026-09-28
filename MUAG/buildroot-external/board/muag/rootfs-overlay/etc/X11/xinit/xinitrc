@@ -1,0 +1,11 @@
+#!/bin/sh
+xsetroot -solid "#101318" 2>/dev/null || true
+
+# AZAD -> MUAG control is provided by the boot-time local Unix socket service.
+if command -v muag-shell >/dev/null 2>&1; then
+    muag-shell &
+else
+    xterm &
+fi
+
+exec openbox-session

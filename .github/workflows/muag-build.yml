@@ -1,0 +1,86 @@
+name: MUAG x86_64 Build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    paths:
+      - "MUAG/**"
+      - ".github/workflows/muag-build.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout MUAG source
+        uses: actions/checkout@v4
+
+      - name: Install host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            bc bison build-essential cpio elfutils file flex gawk git qemu-system-x86 ovmf xorriso \
+            libelf-dev libdw-dev libncurses-dev zlib1g-dev \
+            pahole pkg-config rsync unzip wget python3
+
+      - name: Download Buildroot LTS
+        run: |
+          curl -L --fail \
+            https://buildroot.org/downloads/buildroot-2025.02.18.tar.xz \
+            -o /tmp/buildroot.tar.xz
+          tar -xf /tmp/buildroot.tar.xz -C /tmp
+
+      - name: Configure MUAG
+        run: |
+          make -C /tmp/buildroot-2025.02.18 \
+            BR2_EXTERNAL="$GITHUB_WORKSPACE/MUAG/buildroot-external" \
+            O="$GITHUB_WORKSPACE/MUAG/output" \
+            muag_x86_64_defconfig
+
+      - name: Build MUAG
+        run: |
+          sudo chmod 755 "$GITHUB_WORKSPACE/MUAG/buildroot-external/board/muag/post-build.sh"
+          sudo chmod +x "$GITHUB_WORKSPACE/MUAG/buildroot-external/board/muag/post-build.sh"
+          stat -c '%A %a %n' "$GITHUB_WORKSPACE/MUAG/buildroot-external/board/muag/post-build.sh"
+          test -x "$GITHUB_WORKSPACE/MUAG/buildroot-external/board/muag/post-build.sh"
+          make -C /tmp/buildroot-2025.02.18 \
+            BR2_EXTERNAL="$GITHUB_WORKSPACE/MUAG/buildroot-external" \
+            O="$GITHUB_WORKSPACE/MUAG/output" \
+            -j"$(nproc)"
+
+      - name: Verify image size and boot artifact
+        run: |
+          ls -lh MUAG/output/images/
+          test -f MUAG/output/images/rootfs.iso9660
+          SIZE_BYTES=$(stat -c%s MUAG/output/images/rootfs.iso9660)
+          MAX_BYTES=$((2*1024*1024*1024))
+          test "$SIZE_BYTES" -le "$MAX_BYTES"
+
+      - name: Boot smoke test with QEMU
+        run: |
+          set -euxo pipefail
+          ISO="MUAG/output/images/rootfs.iso9660"
+          file "$ISO"
+          xorriso -indev "$ISO" -report_el_torito plain
+          OVMF_CODE=$(find /usr/share/OVMF -type f \( -name 'OVMF_CODE.fd' -o -name 'OVMF_CODE_4M.fd' \) | head -n1)
+          test -n "$OVMF_CODE"
+          timeout 20s qemu-system-x86_64 -machine q35 -m 512M -bios "$OVMF_CODE" -cdrom "$ISO" -display none -serial stdio -monitor none > MUAG/qemu-boot.log 2>&1 || RC=$?
+          RC=${RC:-0}
+          cat MUAG/qemu-boot.log
+          test "$RC" -eq 0 -o "$RC" -eq 124
+
+      - name: Generate checksum
+        run: |
+          cd MUAG/output/images
+          sha256sum rootfs.iso9660 > rootfs.iso9660.sha256
+
+      - name: Upload MUAG ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: muag-x86_64-iso
+          path: |
+            MUAG/output/images/rootfs.iso9660
+            MUAG/output/images/rootfs.iso9660.sha256
+            MUAG/qemu-boot.log

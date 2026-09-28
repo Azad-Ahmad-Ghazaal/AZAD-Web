@@ -1,0 +1,9 @@
+#!/bin/sh
+case "$1" in
+  start)
+    # Keep common Chromebook input stacks alive before X starts.
+    if command -v udevd >/dev/null 2>&1; then
+      udevd --daemon 2>/dev/null || true
+    fi
+    ;;
+esac

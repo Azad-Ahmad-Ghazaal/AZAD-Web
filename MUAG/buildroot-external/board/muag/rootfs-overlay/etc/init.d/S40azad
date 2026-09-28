@@ -1,0 +1,18 @@
+#!/bin/sh
+# Start AZAD's local MUAG control service early enough for the desktop session.
+case "$1" in
+  start)
+    if command -v muag-actiond >/dev/null 2>&1; then
+      mkdir -p /run/muag
+      /usr/bin/muag-actiond >/var/log/muag-actiond.log 2>&1 &
+      echo $! >/run/muag/actiond.pid
+    fi
+    ;;
+  stop)
+    if [ -f /run/muag/actiond.pid ]; then
+      kill "$(cat /run/muag/actiond.pid)" 2>/dev/null || true
+      rm -f /run/muag/actiond.pid
+    fi
+    rm -f /run/muag/azad.sock
+    ;;
+esac

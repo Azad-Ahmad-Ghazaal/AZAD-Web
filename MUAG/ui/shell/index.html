@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MUAG Desktop</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#f7f7f7;background:#111;--glass:rgba(28,28,32,.86);--line:rgba(255,255,255,.1);--accent:#5aa9ff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;overflow:hidden;background:radial-gradient(circle at 30% 20%,#30445d 0,#171b22 38%,#0b0d10 100%)}
+button,input{font:inherit}.desktop{height:100vh;position:relative}.top{padding:24px;color:#fff}.brand{font-weight:700;font-size:20px}.hint{opacity:.65;font-size:13px;margin-top:4px}
+.taskbar{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);height:62px;padding:8px 12px;display:flex;gap:8px;align-items:center;background:var(--glass);border:1px solid var(--line);border-radius:20px;backdrop-filter:blur(18px);box-shadow:0 12px 40px #0008}
+.icon{width:46px;height:46px;border:0;border-radius:13px;background:#ffffff12;color:#fff;cursor:pointer;font-size:20px}.icon:hover,.icon:focus{background:#ffffff24;outline:none}
+.start{position:absolute;left:50%;bottom:86px;transform:translateX(-50%) scale(.96);width:min(620px,calc(100vw - 28px));padding:20px;border:1px solid var(--line);border-radius:24px;background:var(--glass);backdrop-filter:blur(22px);box-shadow:0 24px 70px #0009;opacity:0;pointer-events:none;transition:.16s ease}
+.start.open{opacity:1;pointer-events:auto;transform:translateX(-50%) scale(1)}
+.search{width:100%;padding:13px 16px;border:1px solid var(--line);border-radius:13px;background:#ffffff10;color:#fff;outline:none}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}.app{padding:14px 8px;border:0;border-radius:15px;background:#ffffff09;color:#fff;cursor:pointer}.app:hover{background:#ffffff18}.app span{display:block;font-size:12px;margin-top:7px}
+.section{margin-top:20px;font-size:13px;opacity:.7}.recent{display:flex;gap:8px;margin-top:8px}.recent button{flex:1;text-align:left;padding:12px;border:1px solid var(--line);border-radius:12px;background:#ffffff08;color:#fff}
+.status{margin-left:6px;padding-left:12px;border-left:1px solid var(--line);font-size:12px;opacity:.85}
+@media(max-width:600px){.grid{grid-template-columns:repeat(2,1fr)}.taskbar{width:calc(100vw - 20px);justify-content:center}.status{display:none}}
+</style>
+</head>
+<body>
+<main class="desktop" id="desktop">
+  <div class="top"><div class="brand">MUAG</div><div class="hint">Lightweight desktop • Touch ready</div></div>
+  <section class="start" id="start" aria-label="Start menu">
+    <input class="search" id="search" placeholder="Search apps and settings…" autocomplete="off">
+    <div class="grid" id="apps">
+      <button class="app" data-name="Browser" onclick="launch('Browser')">🌐<span>Browser</span></button>
+      <button class="app" data-name="Files File Manager" onclick="launch('Files')">📁<span>Files</span></button>
+      <button class="app" data-name="Settings" onclick="launch('Settings')">⚙️<span>Settings</span></button>
+      <button class="app" data-name="Terminal" onclick="launch('Terminal')">⌨️<span>Terminal</span></button>
+      <button class="app" data-name="Hardware Check" onclick="launch('Hardware Check')">🧰<span>Hardware</span></button>
+      <button class="app" data-name="Network WiFi Bluetooth" onclick="launch('Network')">📶<span>Network</span></button>
+    </div>
+    <div class="section">Recommended</div>
+    <div class="recent"><button onclick="launch('Files')">📄 Downloads</button><button onclick="launch('Settings')">⚙️ System settings</button></div>
+  </section>
+  <nav class="taskbar" aria-label="Taskbar">
+    <button class="icon" id="startBtn" aria-label="Start">⊞</button>
+    <button class="icon" onclick="launch('Browser')" aria-label="Browser">🌐</button>
+    <button class="icon" onclick="launch('Files')" aria-label="Files">📁</button>
+    <button class="icon" onclick="launch('Terminal')" aria-label="Terminal">⌨️</button>
+    <div class="status" id="status">MUAG • --:--</div>
+  </nav>
+</main>
+<script>
+const start=document.getElementById('start'),startBtn=document.getElementById('startBtn'),search=document.getElementById('search');
+startBtn.addEventListener('click',()=>{start.classList.toggle('open');if(start.classList.contains('open'))setTimeout(()=>search.focus(),50)});
+document.addEventListener('click',e=>{if(start.classList.contains('open')&&!start.contains(e.target)&&e.target!==startBtn)start.classList.remove('open')});
+search.addEventListener('input',()=>{const q=search.value.toLowerCase();document.querySelectorAll('.app').forEach(a=>a.style.display=a.dataset.name.toLowerCase().includes(q)?'block':'none')});
+document.addEventListener('keydown',e=>{if((e.key==='Meta'||e.key==='Control')&&e.key===' '){e.preventDefault();start.classList.toggle('open');if(start.classList.contains('open'))search.focus()}});
+function launch(name){console.log('MUAG launch:',name);start.classList.remove('open')}
+function tick(){document.getElementById('status').textContent='MUAG • '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+tick();setInterval(tick,30000);
+</script>
+</body>
+</html>

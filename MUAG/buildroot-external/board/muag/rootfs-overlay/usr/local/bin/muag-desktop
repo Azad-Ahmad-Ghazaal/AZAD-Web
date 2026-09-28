@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+
+# MUAG lightweight desktop launcher.
+# Keep this layer dependency-light so the image remains suitable for 4 GB Chromebooks.
+
+export XDG_CURRENT_DESKTOP=MUAG
+export XDG_SESSION_DESKTOP=muag
+export XDG_CONFIG_DIRS=/etc/xdg
+export XDG_DATA_DIRS=/usr/share
+
+mkdir -p "$HOME/.config/openbox" "$HOME/Desktop" "$HOME/Downloads"
+
+if command -v startx >/dev/null 2>&1; then
+    exec startx
+fi
+
+echo "MUAG graphical session is not available in this build."
+exit 1

@@ -1,0 +1,6 @@
+config BR2_PACKAGE_MUAG_WHISPER
+    bool "MUAG offline Whisper STT"
+    depends on BR2_PACKAGE_HOST_CMAKE
+    help
+      Builds whisper.cpp for local x86_64 speech-to-text.
+      Model files are kept outside the OS image so the base image stays small.

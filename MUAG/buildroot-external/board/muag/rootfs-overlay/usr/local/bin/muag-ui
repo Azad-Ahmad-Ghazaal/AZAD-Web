@@ -1,0 +1,4 @@
+#!/bin/sh
+printf '%s\n' 'MUAG Project'
+printf '%s\n' 'Graphical shell foundation is installed.'
+printf '%s\n' 'Desktop UI, touch gestures, settings and browser are next.'
