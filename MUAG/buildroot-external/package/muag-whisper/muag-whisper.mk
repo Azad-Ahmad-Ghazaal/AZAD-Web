@@ -1,0 +1,17 @@
+MUAG_WHISPER_VERSION = 1.9.4
+MUAG_WHISPER_SITE = https://github.com/ggml-org/whisper.cpp/archive/refs/tags/v$(MUAG_WHISPER_VERSION).tar.gz
+MUAG_WHISPER_LICENSE = MIT
+MUAG_WHISPER_LICENSE_FILES = LICENSE
+MUAG_WHISPER_DEPENDENCIES = host-cmake
+
+MUAG_WHISPER_CONF_OPTS = \
+	-DWHISPER_BUILD_TESTS=OFF \
+	-DWHISPER_BUILD_EXAMPLES=ON \
+	-DWHISPER_SDL2=OFF \
+	-DWHISPER_OPENVINO=OFF
+
+define MUAG_WHISPER_INSTALL_TARGET_CMDS
+	$(INSTALL) -D -m 0755 $(@D)/build/bin/whisper-cli $(TARGET_DIR)/usr/bin/whisper-cli
+endef
+
+$(eval $(cmake-package))
