@@ -37,6 +37,10 @@ jobs:
             O="$GITHUB_WORKSPACE/MUAG/output" \
             muag_x86_64_defconfig
 
+      - name: Fix build script permissions
+        run: |
+          chmod +x MUAG/buildroot-external/board/muag/post-build.sh
+
       - name: Build MUAG
         run: |
           make -C /tmp/buildroot-2025.02.18 \
